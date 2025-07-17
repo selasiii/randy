@@ -111,4 +111,110 @@ Randy is an experimental bot for educational purposes. Trading leveraged instrum
 
 ---
 
-```
+
+## TASK LIST
+
+Here's a **clear and actionable developer task list** to build out the full Randy forex trading bot in stages. We'll follow a modular development roadmap so each step is focused, testable, and builds on the last.
+
+---
+
+### ✅ PHASE 1: Basic Trade Execution
+
+**Goal:** Set up Randy to detect new 1-minute candles and place Buy + Sell orders.
+
+* [x] **Initialize MT5 connection**
+* [x] **Detect new M1 candles**
+* [x] **Place Buy + Sell orders with tight SL**
+* [x] **Log trade actions to console/log file**
+* [x] ✅ Finalize `main.py`, `candle_handler.py`, `order_executor.py`
+
+---
+
+### 🔁 PHASE 2: Anti-Martingale Logic
+
+**Goal:** Add reaction logic once SL is hit to scale into the winning direction.
+
+* [x] Detect which initial trade was stopped out
+* [x] Begin placing exponentially larger trades in the winning direction
+* [x] Implement pip-based spacing between anti-martingale entries
+* [x] Limit number of anti-martingale trades (`max_trades`)
+* [x] Finalize `trade_manager.py`
+
+---
+
+### 🛡 PHASE 3: Breakeven and Trailing SL
+
+**Goal:** Lock in profits intelligently and exit safely.
+
+* [ ] Move SL to breakeven after `X` pips
+* [ ] Enable trailing SL after `Y` pips
+* [ ] Finalize dynamic SL logic inside `trade_manager.py`
+
+---
+
+### 📊 PHASE 4: Risk Management
+
+**Goal:** Protect capital and control exposure.
+
+* [ ] Implement max daily loss / profit logic
+* [ ] Halt trading after hitting limits
+* [ ] SL-based trade invalidation logic (if gap or slippage exceeds tolerance)
+* [ ] Finalize `risk_manager.py`
+
+---
+
+### 🎯 PHASE 5: Optional Strategy Filters
+
+**Goal:** Add toggleable confluence checks to improve signal quality.
+
+* [ ] Directional bias filter (e.g., EMA 20 > EMA 50 = bullish bias)
+* [ ] Multi-timeframe trend alignment (M1 aligned with M5 or M15)
+* [ ] Choppy market filter using ATR or Bollinger Band width
+* [ ] Add all strategy toggles to `config.py`
+* [ ] Finalize `filters.py`
+
+---
+
+### 📁 PHASE 6: Logging & Utilities
+
+**Goal:** Ensure logging, tracking, and reusable MT5 helpers.
+
+* [ ] Log trades, SL/TP, and bot events to `logs/trade_log.txt`
+* [ ] Create helper functions in `mt5_utils.py` (e.g., get\_price, get\_point, check\_open\_orders)
+* [ ] Finalize `logger.py` and `mt5_utils.py`
+
+---
+
+### 🖥 PHASE 7: Optional GUI / Dashboard (stretch goal)
+
+**Goal:** Add a visual dashboard or control panel.
+
+* [ ] Show open trades, lot progression, current P/L
+* [ ] Manual toggle to pause/resume bot
+* [ ] Export trade history
+
+---
+
+### 🧪 PHASE 8: Testing & Optimization
+
+**Goal:** Backtest and optimize the bot under various conditions.
+
+* [ ] Backtest core logic on historical data
+* [ ] Optimize SL, pip spacing, breakeven, trailing SL
+* [ ] Stress test with volatile pairs
+* [ ] Prepare checklist for going live
+
+---
+
+### 🔚 FINAL PHASE: Deployment
+
+**Goal:** Package and deploy the bot for daily execution.
+
+* [ ] Create `.env` or secure config for credentials
+* [ ] Add startup and restart logic
+* [ ] (Optional) Integrate Telegram alerts or error notifications
+
+---
+
+Let me know when you want to tackle **PHASE 1** step-by-step — I’ll start generating the actual code for `main.py`, `config.py`, and `core/candle_handler.py`.
+
