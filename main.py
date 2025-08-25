@@ -59,6 +59,7 @@ def main():
     last_open_time = None
 
     global buy_ticket, sell_ticket
+    closed_this_candle = False  # ✅ cooldown flag
 
     while True:
         candle = get_latest_candle(symbol, timeframe)
@@ -74,11 +75,15 @@ def main():
             sell_ticket = place_order(symbol, mt5.ORDER_TYPE_SELL, lot, sl_pips, magic)
             last_open_time = open_time
 
-        # ✅ Auto-close trades before candle end
-        if CONFIG.get("auto_close_before_candle", False):
+            # ✅ Reset cooldown at the start of a new candle
+            closed_this_candle = False
+
+        # ✅ Auto-close trades before candle end (once per candle)
+        if CONFIG.get("auto_close_before_candle", False) and not closed_this_candle:
             seconds_left = time_left_in_candle(timeframe)
             if seconds_left <= CONFIG.get("close_seconds_before", 10):
                 close_all_trades()
+                closed_this_candle = True  # prevent multiple closes in same candle
 
         # Check SL trigger and activate anti-martingale if applicable
         if CONFIG["enable_antimartingale"] and buy_ticket and sell_ticket:
