@@ -30,3 +30,26 @@ def place_order(symbol, order_type, lot, sl_pips, magic):
     else:
         print(f"✅ {['BUY','SELL'][order_type==mt5.ORDER_TYPE_SELL]} order placed at {price}, SL: {sl}")
         return result.order
+
+def modify_sl(ticket, new_sl):
+    position = mt5.positions_get(ticket=ticket)
+    if not position:
+        print(f"⚠️ No open position found for ticket {ticket}")
+        return
+
+    position = position[0]
+    request = {
+        "action": mt5.TRADE_ACTION_SLTP,
+        "position": ticket,
+        "sl": new_sl,
+        "tp": position.tp,
+        "symbol": position.symbol,
+        "magic": position.magic,
+        "comment": "Randy SL Update"
+    }
+
+    result = mt5.order_send(request)
+    if result.retcode != mt5.TRADE_RETCODE_DONE:
+        print(f"❌ Failed to modify SL: {result.retcode}")
+    else:
+        print(f"✅ SL updated for ticket {ticket} → {new_sl}")

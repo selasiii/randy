@@ -4,6 +4,7 @@ import time
 import MetaTrader5 as mt5
 from config import CONFIG
 from utils.mt5_utils import initialize_mt5
+from utils.time_utils import time_left_in_candle
 from core.candle_handler import get_latest_candle, is_new_candle
 from core.order_executor import place_order
 from core.trade_manager import (
@@ -16,12 +17,41 @@ symbol = CONFIG["symbol"]
 lot = CONFIG["lot"]
 sl_pips = CONFIG["sl_pips"]
 magic = CONFIG["magic_number"]
-timeframe = mt5.TIMEFRAME_M1
+timeframe = CONFIG["timeframe"]
 interval = CONFIG["check_interval"]
 
 # Track tickets
 buy_ticket = None
 sell_ticket = None
+
+def close_all_trades():
+    """
+    Closes all open trades for the current symbol.
+    """
+    positions = mt5.positions_get(symbol=symbol)
+    if not positions:
+        return
+
+    for pos in positions:
+        order_type = mt5.ORDER_TYPE_SELL if pos.type == mt5.POSITION_TYPE_BUY else mt5.ORDER_TYPE_BUY
+        price = mt5.symbol_info_tick(pos.symbol).bid if order_type == mt5.ORDER_TYPE_SELL else mt5.symbol_info_tick(pos.symbol).ask
+
+        request = {
+            "action": mt5.TRADE_ACTION_DEAL,
+            "symbol": pos.symbol,
+            "volume": pos.volume,
+            "type": order_type,
+            "position": pos.ticket,
+            "price": price,
+            "deviation": 20,
+            "magic": CONFIG["magic_number"],
+            "comment": "Auto-close before candle end"
+        }
+        result = mt5.order_send(request)
+        if result.retcode == mt5.TRADE_RETCODE_DONE:
+            print(f"🛑 Closed position {pos.ticket} ({pos.symbol}, {pos.volume} lots)")
+        else:
+            print(f"⚠️ Failed to close position {pos.ticket}. Retcode: {result.retcode}")
 
 def main():
     print("🚀 Starting Randy Bot...")
@@ -43,6 +73,12 @@ def main():
             buy_ticket = place_order(symbol, mt5.ORDER_TYPE_BUY, lot, sl_pips, magic)
             sell_ticket = place_order(symbol, mt5.ORDER_TYPE_SELL, lot, sl_pips, magic)
             last_open_time = open_time
+
+        # ✅ Auto-close trades before candle end
+        if CONFIG.get("auto_close_before_candle", False):
+            seconds_left = time_left_in_candle(timeframe)
+            if seconds_left <= CONFIG.get("close_seconds_before", 10):
+                close_all_trades()
 
         # Check SL trigger and activate anti-martingale if applicable
         if CONFIG["enable_antimartingale"] and buy_ticket and sell_ticket:
