@@ -85,17 +85,19 @@ def manage_antimartingale(symbol):
             current_price = get_current_tick(symbol).ask if pos.type == mt5.ORDER_TYPE_BUY else get_current_tick(symbol).bid
             profit_pips = (current_price - pos.price_open) / get_point(symbol) if pos.type == mt5.ORDER_TYPE_BUY else (pos.price_open - current_price) / get_point(symbol)
 
-            # Breakeven
-            if profit_pips >= CONFIG["breakeven_trigger"]:
+            # --- Breakeven logic ---
+            if profit_pips >= CONFIG["breakeven_pips"]:
                 new_sl = pos.price_open + CONFIG["breakeven_buffer"] * get_point(symbol) if pos.type == mt5.ORDER_TYPE_BUY \
                          else pos.price_open - CONFIG["breakeven_buffer"] * get_point(symbol)
+
                 if (pos.sl == 0) or (pos.type == mt5.ORDER_TYPE_BUY and new_sl > pos.sl) or (pos.type == mt5.ORDER_TYPE_SELL and new_sl < pos.sl):
                     modify_sl(ticket, new_sl)
 
-            # Trailing stop
-            elif profit_pips >= CONFIG["trailing_trigger"]:
-                trailing_sl = current_price - CONFIG["trailing_distance"] * get_point(symbol) if pos.type == mt5.ORDER_TYPE_BUY \
-                              else current_price + CONFIG["trailing_distance"] * get_point(symbol)
+            # --- Trailing stop logic ---
+            if CONFIG["enable_trailing_stop"] and profit_pips > CONFIG["breakeven_pips"]:
+                trailing_sl = current_price - CONFIG["trailing_stop_pips"] * get_point(symbol) if pos.type == mt5.ORDER_TYPE_BUY \
+                              else current_price + CONFIG["trailing_stop_pips"] * get_point(symbol)
+
                 if (pos.type == mt5.ORDER_TYPE_BUY and trailing_sl > pos.sl) or (pos.type == mt5.ORDER_TYPE_SELL and trailing_sl < pos.sl):
                     modify_sl(ticket, trailing_sl)
 

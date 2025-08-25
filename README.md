@@ -218,3 +218,6 @@ Here's a **clear and actionable developer task list** to build out the full Rand
 
 Let me know when you want to tackle **PHASE 1** step-by-step — I’ll start generating the actual code for `main.py`, `config.py`, and `core/candle_handler.py`.
 
+
+
+Do you want me to also add a hard kill switch that stops opening new anti-martingale trades once BE is hit, and only manages SLs? (That can be a nice protection layer).
