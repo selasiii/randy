@@ -71,6 +71,13 @@ def main():
         is_new, open_time = is_new_candle(candle['time'], last_open_time)
         if is_new:
             print(f"\n🕒 New candle at {open_time}")
+
+            # ✅ Wait X seconds after candle open before placing trades
+            delay = CONFIG.get("entry_delay_seconds", 0)
+            if delay > 0:
+                print(f"⏳ Waiting {delay}s before placing trades...")
+                time.sleep(delay)
+
             buy_ticket = place_order(symbol, mt5.ORDER_TYPE_BUY, lot, sl_pips, magic)
             sell_ticket = place_order(symbol, mt5.ORDER_TYPE_SELL, lot, sl_pips, magic)
             last_open_time = open_time

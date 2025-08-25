@@ -24,5 +24,7 @@ CONFIG = {
         #auto close trades  
     "auto_close_before_candle": True,   # toggle auto close before candle
     "close_seconds_before": 10,  # seconds before candle close to close all trades
+        "entry_delay_seconds": 5      # wait X seconds after candle open before placing trades
+
     
 }
